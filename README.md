@@ -1,5 +1,4 @@
 # 🧠 Credibility Scoring System – Deliverables 1 & 2  
-
 **Author:** Janet Garcia  
 **Course:** Data Science – Applied Machine Learning  
 **Instructor:** Yiqiao  
@@ -8,45 +7,57 @@
 ---
 
 ## 📖 Overview  
-This project evaluates the **credibility of online information sources** using Python.  
+This project investigates how machine learning can evaluate the **credibility of online information sources**.  
 
-- **Deliverable 1:** Introduced a *rule-based system* that scored websites and text based on domains (e.g., `.gov`, `.edu`, `.org`) and surface-level cues (authors, citations, tone).  
-- **Deliverable 2:** Expanded the project into a *data-driven machine-learning model* using **TF-IDF text features** and **Logistic Regression** to classify sources as credible or non-credible.  
+- **Deliverable 1** created a *rule-based scoring function* using domain names and keyword rules.  
+- **Deliverable 2** advances the work into a **data-driven model** using **TF-IDF** text features and **Logistic Regression**, supported by evaluation metrics, cross-validation, and four analytical plots.  
 
-Together, these deliverables show the evolution from a heuristic approach to an interpretable supervised model.
-
----
-
-## 🎯 Project Goals  
-1. Build a Python program that determines how trustworthy a given source or article is.  
-2. Compare the effectiveness of rule-based scoring vs. data-driven modeling.  
-3. Apply key data-science steps: data creation, feature extraction, training, and evaluation.  
-4. Visualize and interpret model results through charts and metrics.  
+The two deliverables together represent a transition from handcrafted rules to an interpretable supervised-learning model.
 
 ---
 
-## 🧩 Project Structure  
-
-| File | Description |
-|------|--------------|
-| `Deliverable1.ipynb` | Rule-based credibility scoring function (heuristics + JSON output). |
-| `Deliverable2.ipynb` | TF-IDF + Logistic Regression model with 4 visualizations. |
-| `README.md` | Combined documentation for both deliverables. |
-| `plots/` | Optional folder to store ROC, PR, and feature-importance charts. |
+## 🎯 Objectives  
+1. Demonstrate how text features can indicate source credibility.  
+2. Build a labeled dataset and extract features using **TF-IDF**.  
+3. Train a **Logistic Regression** classifier to predict credible vs. non-credible text.  
+4. Evaluate and visualize performance with four key plots.  
+5. Compare results to the original rule-based approach.
 
 ---
 
-## 🧱 Deliverable 1 – Rule-Based Credibility Function  
+## 🧱 Deliverable 1 Summary – Rule-Based Credibility Function  
 
-**Concept:**  
-Implements fixed rules to assess credibility by domain type, accessibility, and content structure.
+| Aspect | Description |
+|--------|--------------|
+| **Goal** | Provide a simple credibility score using explicit rules. |
+| **Method** | Checked domains (`.gov`, `.edu`, `.org`), looked for authors and citations, penalized blogs/opinion sites. |
+| **Output** | JSON object: `{"score": 0.90, "explanation": "Government domain (.gov) – highly credible."}` |
+| **Limitation** | Static rules cannot learn new patterns or language changes. |
 
-**Logic Summary:**  
-- Checks if source domain ends in `.gov`, `.edu`, `.org`, or `.com`.  
-- Rewards credible domains and the presence of “References” or “By” author tags.  
-- Penalizes blog-style or opinion sites (e.g., “wordpress,” “medium,” “substack”).  
-- Outputs a JSON-style dictionary like:  
+Deliverable 1 served as the baseline for Deliverable 2’s learning-based model.
 
-```json
-{"score": 0.90, "explanation": "Government domain (.gov) – highly credible."}
+---
 
+## 🤖 Deliverable 2 – TF-IDF + Logistic Regression Model  
+
+Deliverable 2 builds a **machine-learning pipeline** that automatically learns credibility cues from data.  
+The notebook (`Deliverable2.ipynb`) performs all the following steps:
+
+### 1️⃣ Dataset Creation  
+A small synthetic dataset was designed to simulate credible vs. non-credible statements.  
+- **Credible examples** use factual, research-oriented language (e.g., “According to NIH data…”).  
+- **Non-credible examples** use sensational or unsupported phrasing (e.g., “Secret scientists reveal miracle cure!”).  
+Each sample is labeled as `1 = credible` or `0 = not credible`.
+
+### 2️⃣ Feature Extraction – TF-IDF  
+- Converts text to numeric vectors using `TfidfVectorizer(max_features=50, stop_words='english')`.  
+- Highlights uncommon but meaningful words across the dataset.  
+- Produces a feature matrix used for training the model.
+
+### 3️⃣ Model Training – Logistic Regression  
+- Trains a logistic regression classifier to map TF-IDF features to credibility labels.  
+- The model outputs probabilities between 0 and 1, then thresholds them at 0.5 for binary predictions.  
+- Uses 70 % of data for training and 30 % for testing.
+
+### 4️⃣ Evaluation Metrics  
+After prediction, the notebook prints:  
