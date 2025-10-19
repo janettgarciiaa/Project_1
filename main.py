@@ -1,8 +1,8 @@
-from dotenv import load_dotenv
 import os
 import requests
 import streamlit as st
 from anthropic import Anthropic
+from dotenv import load_dotenv
 
 load_dotenv()
 anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
