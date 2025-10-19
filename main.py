@@ -1,5 +1,9 @@
-# --- Claude Chatbot Response Section ---
+import streamlit as st
+import requests
+import os
+import json
 
+# --- Claude Chatbot Response Section ---
 try:
     # Prepare user prompt with optional context from web search
     if context_from_search:
