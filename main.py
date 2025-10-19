@@ -30,19 +30,20 @@ with st.sidebar:
 # Function to call Perplexity API
 def ask_perplexity(prompt, web_enabled=True):
     model = "llama-3.1-sonar-small-128k-online" if web_enabled else "llama-3.1-sonar-small-128k-chat"
-    headers = {"Authorization": f"Bearer {PPLX_KEY}", "Content-Type": "application/json"}
+    headers = {
+        "Authorization": f"Bearer {PPLX_KEY}",
+        "Content-Type": "application/json",
+    }
     data = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.3,
-        "max_tokens": 500,
     }
 
     try:
-        r = requests.post("https://api.perplexity.ai/chat/completions", json=data, headers=headers)
-        r.raise_for_status()
-        result = r.json()
-        return result["choices"][0]["message"]["content"].strip()
+        response = requests.post("https://api.perplexity.ai/chat/completions", json=data, headers=headers)
+        response.raise_for_status()
+        result = response.json()
+        return result["choices"][0]["message"]["content"]
     except Exception as e:
         return f"⚠️ API Error: {str(e)}"
 
