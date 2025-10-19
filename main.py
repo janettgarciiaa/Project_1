@@ -7,7 +7,9 @@ from anthropic import Anthropic
 load_dotenv()
 anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
 perplexity_api_key = os.getenv("PERPLEXITY_API_KEY")
-client = Anthropic(api_key=anthropic_api_key)
+from anthropic import Anthropic
+
+client = Anthropic(api_key=anthropic_api_key, max_retries=None)
 
 def perplexity_search(query):
     """Perform a web search using Perplexity API"""
