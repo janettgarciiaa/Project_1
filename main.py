@@ -122,7 +122,7 @@ if st.button("Submit") and user_input:
         search_results = perplexity_search(user_input)
         st.markdown(search_results)
     else:
-response_text = ask_claude_via_rest(user_input)
+	response_text = ask_claude_via_rest(user_input)
 st.write(response_text)
 
 # ----------------------------
