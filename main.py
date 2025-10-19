@@ -1,4 +1,4 @@
-K# --- Claude Chatbot Response Section ---
+# --- Claude Chatbot Response Section ---
 
 try:
     # Prepare user prompt with optional context from web search
