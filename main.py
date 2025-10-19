@@ -4,6 +4,11 @@ import os
 import json
 
 # --- Claude Chatbot Response Section ---
+sources_md = None
+search_note = None
+context_from_search = None
+prompt = st.session_state.get("user_input", "")
+
 try:
     # Prepare user prompt with optional context from web search
     if context_from_search:
