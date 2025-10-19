@@ -7,14 +7,35 @@ from dotenv import load_dotenv
 load_dotenv()
 anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
 perplexity_api_key = os.getenv("PERPLEXITY_API_KEY")
-from anthropic import Anthropic
 
-try:
-    from anthropic import Anthropic
-    client = Anthropic(api_key=anthropic_api_key)
-except TypeError:
-    import anthropic
-    client = anthropic.Client(api_key=anthropic_api_key)
+import os
+import requests
+
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+
+def ask_claude_via_rest(prompt: str) -> str:
+    """
+    Call Anthropic Messages API via HTTPS (no SDK). Returns plain text.
+    """
+    url = "https://api.anthropic.com/v1/messages"
+    headers = {
+        "x-api-key": ANTHROPIC_API_KEY,
+        # This version string is what Anthropic’s REST API expects today.
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+    }
+    payload = {
+        "model": "claude-3-sonnet-20240229",
+        "max_tokens": 300,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+    r = requests.post(url, headers=headers, json=payload, timeout=60)
+    r.raise_for_status()
+    data = r.json()
+    # The REST response has content blocks like [{"type":"text","text":"..."}]
+    parts = data.get("content", [])
+    text = "\n".join(p.get("text", "") for p in parts if p.get("type") == "text")
+    return text.strip() or "(No text content returned.)"
 
 def perplexity_search(query):
     """Perform a web search using Perplexity API"""
@@ -101,12 +122,8 @@ if st.button("Submit") and user_input:
         search_results = perplexity_search(user_input)
         st.markdown(search_results)
     else:
-        message = client.messages.create(
-            model="claude-3-sonnet-20240229",
-            max_tokens=300,
-            messages=[{"role": "user", "content": user_input}]
-        )
-        st.write(message.content[0].text)
+response_text = ask_claude_via_rest(user_input)
+st.write(response_text)
 
 # ----------------------------
 # Chat history
