@@ -3,47 +3,42 @@ import requests
 import streamlit as st
 
 # -----------------------------
-# 💬 Perplexity Chatbot (Final Developer-Key Version)
+# ✅ Perplexity Chatbot (Free Developer-Key Version)
 # -----------------------------
 
 st.set_page_config(page_title="Perplexity Chatbot", page_icon="🌐")
 st.title("Perplexity Chatbot 🌐")
 
-# Load Perplexity API key
+# Load API key
 PPLX_KEY = st.secrets.get("PERPLEXITY_API_KEY", os.getenv("PERPLEXITY_API_KEY", ""))
 
 if not PPLX_KEY:
     st.error("❌ Missing Perplexity API key. Please add it in Settings → Secrets.")
     st.stop()
 
-# Initialize chat history
+# Initialize session
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # Sidebar
 with st.sidebar:
-    st.header("Web Search Settings")
-    use_web = st.checkbox("Enable Web Search", value=True)
-    st.caption("When enabled, Perplexity will fetch real-time info from the web.")
-    st.success("✅ Connected to Perplexity API")
+    st.header("Chat Settings")
+    st.caption("💡 Using Perplexity free API model: 'mixtral-8x7b-instruct'.")
+    st.success("✅ Connected successfully")
 
-# Function to call Perplexity API (developer version)
-def ask_perplexity(prompt, web_enabled=True):
-    # ✅ Use correct model for free-tier API
-    model = "llama-3.1-sonar-small-128k-online"
-
+# Function to call Perplexity API
+def ask_perplexity(prompt):
     headers = {
         "Authorization": f"Bearer {PPLX_KEY}",
         "Content-Type": "application/json",
     }
 
-    # ✅ Perplexity free-tier expects this JSON body:
     payload = {
-        "model": model,
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.2
+        # ✅ Free-tier supported model
+        "model": "mixtral-8x7b-instruct",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.5,
+        "max_tokens": 200
     }
 
     try:
@@ -54,10 +49,9 @@ def ask_perplexity(prompt, web_enabled=True):
             timeout=60
         )
 
-        # Debug info in Streamlit if needed
         if response.status_code != 200:
             st.warning(f"⚠️ API response {response.status_code}: {response.text}")
-            return "⚠️ Perplexity returned an error. Please check your key or model."
+            return "⚠️ Perplexity returned an error."
 
         data = response.json()
         return data["choices"][0]["message"]["content"]
@@ -65,12 +59,12 @@ def ask_perplexity(prompt, web_enabled=True):
     except Exception as e:
         return f"⚠️ API Error: {str(e)}"
 
-# Display previous messages
+# Display chat history
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# User input
+# User prompt
 if prompt := st.chat_input("Ask something..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -78,7 +72,7 @@ if prompt := st.chat_input("Ask something..."):
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            reply = ask_perplexity(prompt, use_web)
+            reply = ask_perplexity(prompt)
         st.markdown(reply)
 
     st.session_state.messages.append({"role": "assistant", "content": reply})
