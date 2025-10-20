@@ -3,13 +3,13 @@ import requests
 import streamlit as st
 
 # -----------------------------
-# Perplexity-Only Chatbot (2025 Stable Format)
+# Perplexity-Only Chatbot (FINAL – 2025 Verified)
 # -----------------------------
 
 st.set_page_config(page_title="Claude Chatbot with Web Search", page_icon="🌐")
 st.title("Claude Chatbot with Web Search 🌐")
 
-# Load the Perplexity API key
+# Load Perplexity API key
 PPLX_KEY = st.secrets.get("PERPLEXITY_API_KEY", os.getenv("PERPLEXITY_API_KEY", ""))
 
 if not PPLX_KEY:
@@ -28,35 +28,39 @@ with st.sidebar:
 
 # Function to call Perplexity API
 def ask_perplexity(prompt, web_enabled=True):
-    # ✅ Use the current supported model names
     model = "llama-3.1-sonar-small-128k-online" if web_enabled else "llama-3.1-sonar-small-128k-chat"
+
     headers = {
         "Authorization": f"Bearer {PPLX_KEY}",
         "Content-Type": "application/json",
     }
-    # ✅ Updated payload structure
-    data = {
+
+    # ✅ The /chat endpoint expects this format now
+    payload = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 500,
-        "temperature": 0.2,
-        "top_p": 0.9,
-        "stream": False,  # Perplexity now requires this key explicitly
     }
 
     try:
         response = requests.post(
-            "https://api.perplexity.ai/chat/completions",
+            "https://api.perplexity.ai/chat",
             headers=headers,
-            json=data,
+            json=payload,
             timeout=60
         )
         response.raise_for_status()
         result = response.json()
-        # ✅ Correct field path (as of Oct 2025)
-        return result["choices"][0]["message"]["content"]
+
+        # ✅ Updated key location (no "choices" array in /chat)
+        if "output_text" in result:
+            return result["output_text"]
+        elif "message" in result and "content" in result["message"]:
+            return result["message"]["content"]
+        else:
+            return "⚠️ Unexpected response format from Perplexity API."
+
     except Exception as e:
-        return f"⚠️ API Error: {e}"
+        return f"⚠️ API Error: {str(e)}"
 
 # Display chat history
 for msg in st.session_state.messages:
