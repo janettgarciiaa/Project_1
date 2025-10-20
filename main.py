@@ -3,7 +3,7 @@ import requests
 import streamlit as st
 
 # -----------------------------
-# Perplexity-Only Chatbot (FINAL – 2025 Verified)
+# ✅ FINAL - Perplexity Chatbot (Public API, October 2025)
 # -----------------------------
 
 st.set_page_config(page_title="Claude Chatbot with Web Search", page_icon="🌐")
@@ -24,7 +24,7 @@ if "messages" not in st.session_state:
 with st.sidebar:
     st.header("Web Search Settings")
     use_web = st.checkbox("Enable Web Search", value=True)
-    st.caption("When enabled, Perplexity fetches live information from the web.")
+    st.caption("When enabled, Perplexity fetches live web results.")
 
 # Function to call Perplexity API
 def ask_perplexity(prompt, web_enabled=True):
@@ -35,15 +35,17 @@ def ask_perplexity(prompt, web_enabled=True):
         "Content-Type": "application/json",
     }
 
-    # ✅ The /chat endpoint expects this format now
+    # ✅ Correct endpoint for public API keys
     payload = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 500,
+        "temperature": 0.3,
     }
 
     try:
         response = requests.post(
-            "https://api.perplexity.ai/chat",
+            "https://api.perplexity.ai/chat/completions",
             headers=headers,
             json=payload,
             timeout=60
@@ -51,13 +53,8 @@ def ask_perplexity(prompt, web_enabled=True):
         response.raise_for_status()
         result = response.json()
 
-        # ✅ Updated key location (no "choices" array in /chat)
-        if "output_text" in result:
-            return result["output_text"]
-        elif "message" in result and "content" in result["message"]:
-            return result["message"]["content"]
-        else:
-            return "⚠️ Unexpected response format from Perplexity API."
+        # ✅ Consistent message extraction path
+        return result["choices"][0]["message"]["content"]
 
     except Exception as e:
         return f"⚠️ API Error: {str(e)}"
