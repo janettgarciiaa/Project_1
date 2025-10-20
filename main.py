@@ -3,11 +3,11 @@ import requests
 import streamlit as st
 
 # -----------------------------
-# Claude Chatbot (Perplexity-only)
+# Perplexity Chatbot (Developer Key Version)
 # -----------------------------
 
-st.set_page_config(page_title="Claude Chatbot with Web Search", page_icon="🌐")
-st.title("Claude Chatbot with Web Search 🌐")
+st.set_page_config(page_title="Perplexity Chatbot", page_icon="🌐")
+st.title("Perplexity Chatbot 🌐")
 
 # Load the Perplexity API key
 PPLX_KEY = st.secrets.get("PERPLEXITY_API_KEY", os.getenv("PERPLEXITY_API_KEY", ""))
@@ -17,7 +17,7 @@ if not PPLX_KEY:
     st.error("❌ Missing Perplexity API key. Please add it in Settings → Secrets.")
     st.stop()
 
-# Initialize session history
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -26,41 +26,42 @@ with st.sidebar:
     st.header("Web Search Settings")
     use_web = st.checkbox("Enable Web Search", value=True)
     st.caption("When enabled, Perplexity will fetch real-time info from the web.")
-    st.info("✅ Connected to Perplexity API at /chat/completions")
 
-# Function to call Perplexity API
+# Function to call Perplexity API (developer key version)
 def ask_perplexity(prompt, web_enabled=True):
     model = "llama-3.1-sonar-small-128k-online" if web_enabled else "llama-3.1-sonar-small-128k-chat"
-
     headers = {
         "Authorization": f"Bearer {PPLX_KEY}",
         "Content-Type": "application/json",
     }
 
-    # ✅ Correct payload format per Perplexity API docs (Oct 2025)
     payload = {
         "model": model,
         "messages": [
             {"role": "user", "content": prompt}
-        ],
-        "max_tokens": 512,
-        "temperature": 0.3
+        ]
     }
 
     try:
+        # ✅ Correct endpoint for developer keys
         response = requests.post(
-            "https://api.perplexity.ai/chat/completions",
+            "https://api.perplexity.ai/completions",
             headers=headers,
             json=payload,
             timeout=60
         )
         response.raise_for_status()
-        result = response.json()
-        return result["choices"][0]["message"]["content"]
+        data = response.json()
+
+        if "choices" in data and len(data["choices"]) > 0:
+            return data["choices"][0]["text"]
+        else:
+            return "⚠️ No response content returned."
+
     except Exception as e:
         return f"⚠️ API Error: {str(e)}"
 
-# Display chat history
+# Display previous messages
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
