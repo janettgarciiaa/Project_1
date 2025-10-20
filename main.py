@@ -3,7 +3,7 @@ import requests
 import streamlit as st
 
 # -----------------------------
-# Perplexity-Only Chatbot (Final 2025 Spec)
+# Perplexity-Only Chatbot (2025 Stable Format)
 # -----------------------------
 
 st.set_page_config(page_title="Claude Chatbot with Web Search", page_icon="🌐")
@@ -12,7 +12,6 @@ st.title("Claude Chatbot with Web Search 🌐")
 # Load the Perplexity API key
 PPLX_KEY = st.secrets.get("PERPLEXITY_API_KEY", os.getenv("PERPLEXITY_API_KEY", ""))
 
-# Stop if no key
 if not PPLX_KEY:
     st.error("Missing Perplexity API key. Please add it in Settings → Secrets.")
     st.stop()
@@ -25,44 +24,46 @@ if "messages" not in st.session_state:
 with st.sidebar:
     st.header("Web Search Settings")
     use_web = st.checkbox("Enable Web Search", value=True)
-    st.caption("When enabled, Perplexity will fetch real-time information from the web.")
+    st.caption("When enabled, Perplexity fetches live information from the web.")
 
 # Function to call Perplexity API
 def ask_perplexity(prompt, web_enabled=True):
+    # ✅ Use the current supported model names
     model = "llama-3.1-sonar-small-128k-online" if web_enabled else "llama-3.1-sonar-small-128k-chat"
     headers = {
         "Authorization": f"Bearer {PPLX_KEY}",
         "Content-Type": "application/json",
     }
+    # ✅ Updated payload structure
     data = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 500,
         "temperature": 0.2,
-        "max_output_tokens": 512,
-        "return_related_questions": False,
+        "top_p": 0.9,
+        "stream": False,  # Perplexity now requires this key explicitly
     }
 
     try:
         response = requests.post(
             "https://api.perplexity.ai/chat/completions",
-            json=data,
             headers=headers,
+            json=data,
             timeout=60
         )
         response.raise_for_status()
         result = response.json()
+        # ✅ Correct field path (as of Oct 2025)
         return result["choices"][0]["message"]["content"]
-    except requests.exceptions.RequestException as e:
-        return f"⚠️ Network or API error: {str(e)}"
     except Exception as e:
-        return f"⚠️ Unexpected error: {str(e)}"
+        return f"⚠️ API Error: {e}"
 
 # Display chat history
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# Handle new user input
+# User input
 if prompt := st.chat_input("Ask something..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
