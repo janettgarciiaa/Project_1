@@ -37,19 +37,14 @@ def ask_perplexity(prompt, web_enabled=True):
         "Content-Type": "application/json",
     }
 
-    # ✅ Correct JSON structure for Perplexity public API (as of Oct 2025)
+    # ✅ Correct payload format per Perplexity API docs (Oct 2025)
     payload = {
         "model": model,
         "messages": [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": prompt}
-                ],
-            }
+            {"role": "user", "content": prompt}
         ],
-        "max_output_tokens": 512,
-        "temperature": 0.3,
+        "max_tokens": 512,
+        "temperature": 0.3
     }
 
     try:
@@ -61,8 +56,7 @@ def ask_perplexity(prompt, web_enabled=True):
         )
         response.raise_for_status()
         result = response.json()
-        return result["choices"][0]["message"]["content"][0]["text"]
-
+        return result["choices"][0]["message"]["content"]
     except Exception as e:
         return f"⚠️ API Error: {str(e)}"
 
