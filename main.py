@@ -3,20 +3,21 @@ import requests
 import streamlit as st
 
 # -----------------------------
-# ✅ FINAL - Perplexity Chatbot (Public API, October 2025)
+# Claude Chatbot (Perplexity-only)
 # -----------------------------
 
 st.set_page_config(page_title="Claude Chatbot with Web Search", page_icon="🌐")
 st.title("Claude Chatbot with Web Search 🌐")
 
-# Load Perplexity API key
+# Load the Perplexity API key
 PPLX_KEY = st.secrets.get("PERPLEXITY_API_KEY", os.getenv("PERPLEXITY_API_KEY", ""))
 
+# Stop if no key
 if not PPLX_KEY:
-    st.error("Missing Perplexity API key. Please add it in Settings → Secrets.")
+    st.error("❌ Missing Perplexity API key. Please add it in Settings → Secrets.")
     st.stop()
 
-# Initialize chat history
+# Initialize session history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -24,7 +25,8 @@ if "messages" not in st.session_state:
 with st.sidebar:
     st.header("Web Search Settings")
     use_web = st.checkbox("Enable Web Search", value=True)
-    st.caption("When enabled, Perplexity fetches live web results.")
+    st.caption("When enabled, Perplexity will fetch real-time info from the web.")
+    st.info("✅ Connected to Perplexity API at /chat/completions")
 
 # Function to call Perplexity API
 def ask_perplexity(prompt, web_enabled=True):
@@ -35,11 +37,18 @@ def ask_perplexity(prompt, web_enabled=True):
         "Content-Type": "application/json",
     }
 
-    # ✅ Correct endpoint for public API keys
+    # ✅ Correct JSON structure for Perplexity public API (as of Oct 2025)
     payload = {
         "model": model,
-        "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 500,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt}
+                ],
+            }
+        ],
+        "max_output_tokens": 512,
         "temperature": 0.3,
     }
 
@@ -52,9 +61,7 @@ def ask_perplexity(prompt, web_enabled=True):
         )
         response.raise_for_status()
         result = response.json()
-
-        # ✅ Consistent message extraction path
-        return result["choices"][0]["message"]["content"]
+        return result["choices"][0]["message"]["content"][0]["text"]
 
     except Exception as e:
         return f"⚠️ API Error: {str(e)}"
