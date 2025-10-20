@@ -3,7 +3,7 @@ import requests
 import streamlit as st
 
 # -----------------------------
-# 💬 Perplexity Chatbot (Working Developer API Version - Oct 2025)
+# 💬 Perplexity Chatbot (Final Working Version - Oct 2025)
 # -----------------------------
 
 st.set_page_config(page_title="Perplexity Chatbot", page_icon="🌐")
@@ -16,14 +16,14 @@ if not PPLX_KEY:
     st.error("❌ Missing Perplexity API key. Please add it in Settings → Secrets.")
     st.stop()
 
-# Initialize messages
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # Sidebar
 with st.sidebar:
     st.header("Chat Settings")
-    st.caption("💡 Using Perplexity developer endpoint (auto model selection).")
+    st.caption("💡 Using model: llama-3.1-mini (developer key compatible)")
     st.success("✅ Connected to Perplexity API")
 
 # Function to call Perplexity API
@@ -33,9 +33,11 @@ def ask_perplexity(prompt):
         "Content-Type": "application/json",
     }
 
-    # ✅ This format works for developer keys — no model field required
     payload = {
+        "model": "llama-3.1-mini",  # ✅ Works for developer-tier API keys
         "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.5,
+        "max_tokens": 200
     }
 
     try:
