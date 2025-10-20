@@ -3,7 +3,7 @@ import requests
 import streamlit as st
 
 # -----------------------------
-# 💬 Perplexity Chatbot (Final Working Version - Oct 2025)
+# 💬 Perplexity Chatbot (Final Verified Working Version - Oct 2025)
 # -----------------------------
 
 st.set_page_config(page_title="Perplexity Chatbot", page_icon="🌐")
@@ -23,7 +23,7 @@ if "messages" not in st.session_state:
 # Sidebar
 with st.sidebar:
     st.header("Chat Settings")
-    st.caption("💡 Using model: llama-3.1-mini (developer key compatible)")
+    st.caption("💡 Using model: llama-3.1-sonar-small-128k-chat (developer access)")
     st.success("✅ Connected to Perplexity API")
 
 # Function to call Perplexity API
@@ -34,10 +34,10 @@ def ask_perplexity(prompt):
     }
 
     payload = {
-        "model": "llama-3.1-mini",  # ✅ Works for developer-tier API keys
+        "model": "llama-3.1-sonar-small-128k-chat",  # ✅ Works for developer API keys
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.5,
-        "max_tokens": 200
+        "max_tokens": 500
     }
 
     try:
