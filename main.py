@@ -3,7 +3,7 @@ import requests
 import streamlit as st
 
 # -----------------------------
-# Perplexity Chatbot (Final Working Version)
+# 💬 Perplexity Chatbot (Final Developer-Key Version)
 # -----------------------------
 
 st.set_page_config(page_title="Perplexity Chatbot", page_icon="🌐")
@@ -27,21 +27,23 @@ with st.sidebar:
     st.caption("When enabled, Perplexity will fetch real-time info from the web.")
     st.success("✅ Connected to Perplexity API")
 
-# Function to call Perplexity API
+# Function to call Perplexity API (developer version)
 def ask_perplexity(prompt, web_enabled=True):
-    model = "llama-3.1-sonar-small-128k-online" if web_enabled else "llama-3.1-sonar-small-128k-chat"
+    # ✅ Use correct model for free-tier API
+    model = "llama-3.1-sonar-small-128k-online"
 
     headers = {
         "Authorization": f"Bearer {PPLX_KEY}",
         "Content-Type": "application/json",
     }
 
-    # ✅ Correct format for /chat/completions
+    # ✅ Perplexity free-tier expects this JSON body:
     payload = {
         "model": model,
-        "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 500,
-        "temperature": 0.3,
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.2
     }
 
     try:
@@ -51,14 +53,14 @@ def ask_perplexity(prompt, web_enabled=True):
             json=payload,
             timeout=60
         )
-        response.raise_for_status()
-        data = response.json()
 
-        if "choices" in data and len(data["choices"]) > 0:
-            message = data["choices"][0]["message"]["content"]
-            return message
-        else:
-            return "⚠️ Unexpected response format."
+        # Debug info in Streamlit if needed
+        if response.status_code != 200:
+            st.warning(f"⚠️ API response {response.status_code}: {response.text}")
+            return "⚠️ Perplexity returned an error. Please check your key or model."
+
+        data = response.json()
+        return data["choices"][0]["message"]["content"]
 
     except Exception as e:
         return f"⚠️ API Error: {str(e)}"
